@@ -114,7 +114,7 @@ export async function handler (
   // For a workspace with shared lockfile
   if (opts.workspaceDir) {
     const allProjects = opts.allProjects ?? await findWorkspacePackages(opts.workspaceDir, opts)
-    const selectedProjectsGraph = opts.selectedProjectsGraph ?? selectProjectByDir(allProjects, opts.dir)
+    const selectedProjectsGraph = selectProjectByDir(allProjects, opts.dir)
     if (selectedProjectsGraph != null) {
       const sequencedGraph = sequenceGraph(selectedProjectsGraph)
       // Check and warn if there are cyclic dependencies

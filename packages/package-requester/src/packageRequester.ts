@@ -176,22 +176,29 @@ async function resolveAndFetch (
       workspacePackages: options.workspacePackages,
     }), { priority: options.downloadPriority })
 
-    manifest = resolveResult.manifest
-    latest = resolveResult.latest
-    resolvedVia = resolveResult.resolvedVia
+    // Ignore the resolution result for packages that already have a lockfile
+    // entry. I.e. favor existing lockfile versions of transitive deps.
+    if (!(options.expectedPkg?.version != null &&
+      resolveResult.manifest?.version != null &&
+      options.expectedPkg.version !== resolveResult.manifest.version
+    )) {
+      manifest = resolveResult.manifest
+      latest = resolveResult.latest
+      resolvedVia = resolveResult.resolvedVia
 
-    // If the integrity of a local tarball dependency has changed,
-    // the local tarball should be unpacked, so a fetch to the store should be forced
-    forceFetch = Boolean(
-      ((options.currentPkg?.resolution) != null) &&
-      pkgId?.startsWith('file:') &&
-      options.currentPkg?.resolution['integrity'] !== resolveResult.resolution['integrity'] // eslint-disable-line @typescript-eslint/dot-notation
-    )
+      // If the integrity of a local tarball dependency has changed,
+      // the local tarball should be unpacked, so a fetch to the store should be forced
+      forceFetch = Boolean(
+        ((options.currentPkg?.resolution) != null) &&
+        pkgId?.startsWith('file:') &&
+        options.currentPkg?.resolution['integrity'] !== resolveResult.resolution['integrity'] // eslint-disable-line @typescript-eslint/dot-notation
+      )
 
-    updated = pkgId !== resolveResult.id || !resolution || forceFetch
-    resolution = resolveResult.resolution
-    pkgId = resolveResult.id
-    normalizedPref = resolveResult.normalizedPref
+      updated = pkgId !== resolveResult.id || !resolution || forceFetch
+      resolution = resolveResult.resolution
+      pkgId = resolveResult.id
+      normalizedPref = resolveResult.normalizedPref
+    }
   }
 
   const id = pkgId as string
